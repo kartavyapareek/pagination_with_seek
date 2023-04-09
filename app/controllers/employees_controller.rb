@@ -5,7 +5,7 @@ class EmployeesController < ApplicationController
     next_page_id = params[:next_page_id] || 0
 
     if params[:page_number].present?
-      skip_objs = (limit * params[:page_number].to_i) - 1
+      skip_objs = (limit * (params[:page_number].to_i - 1)) - 1
       next_page_id = Employee.select(:identification_number)
                              .order(created_at: :desc)
                              .offset(skip_objs)
@@ -23,9 +23,7 @@ class EmployeesController < ApplicationController
                 end
 
     
-    respond_to do |format|
-      format.json { render json: response_json(employees, prev_page_id, next_page_id) }
-    end
+    render json: response_json(employees, prev_page_id, next_page_id)
   end
 end
 
@@ -41,11 +39,11 @@ end
 
 def prev_page_id(results, prev_page_id, next_page_id)
   first_identification_number = results&.first&.identification_number
-  first_identification_number == Employee.select(:identification_number).last.identification_number ? nil : first_identification_number
+  first_identification_number == Employee.select(:identification_number)&.last&.identification_number ? nil : first_identification_number
 end
 
 def next_page_id(results, prev_page_id, next_page_id)
   last_identification_number = results&.last&.identification_number
-  last_identification_number == Employee.select(:identification_number).first.identification_number ? nil : last_identification_number
+  last_identification_number == Employee.select(:identification_number)&.first&.identification_number ? nil : last_identification_number
 end
 
